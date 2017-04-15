@@ -29,6 +29,8 @@
 #include "Sprite.h"
 #include "MainWorld.h"
 #include "PersistantData.h"
+#include "ShaderProg.h"
+
 using namespace glm;
 
 using namespace std;
@@ -225,8 +227,10 @@ void input(MainWorld* &world,PersistantData* &persData,vec3 &colourValueGLMVecto
 
 	}
 }
-void render(GLuint VAO, GLuint EBO,MainWorld* world,PersistantData* persData, vec3 &colourValueGLMVector, GLuint shaderProgram, mat4 viewMatrix, mat4 projectionMatrix)
+void render(GLuint VAO, GLuint EBO,MainWorld* world,PersistantData* persData, vec3 &colourValueGLMVector, ShaderProg* shaderProgram, mat4 viewMatrix, mat4 projectionMatrix)
 {
+
+	
 
 	int numb = 3*12;
 	// pre-render	
@@ -238,8 +242,21 @@ void render(GLuint VAO, GLuint EBO,MainWorld* world,PersistantData* persData, ve
 	glClearColor(colourValueGLMVector.r, colourValueGLMVector.g, colourValueGLMVector.b, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	//draw player
+	if (world->player.dead == false)
+	{
+	//	glBindTexture(GL_TEXTURE_2D, persData->playerTexture);//binds texture
+		GLint modelLocation = glGetUniformLocation(shaderProgram->shader, "modelMat");
+		glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(world->player.modelMatrix*world->player.rotationMatrix));
+
+		world->player.Draw(shaderProgram);
+		//glDrawElements(GL_TRIANGLES, numb, GL_UNSIGNED_INT, 0);
+	}
+
+
+
 	// render
-	glUseProgram(shaderProgram);
+	glUseProgram(shaderProgram->shader);
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 
@@ -247,8 +264,8 @@ void render(GLuint VAO, GLuint EBO,MainWorld* world,PersistantData* persData, ve
 	viewMatrix = glm::lookAt(world->camPosition, world->camPosition + world->camLook, world->camUp);
 
 
-	GLint viewLocation = glGetUniformLocation(shaderProgram, "viewMat");
-	GLint projectionLocation = glGetUniformLocation(shaderProgram, "projectionMat");
+	GLint viewLocation = glGetUniformLocation(shaderProgram->shader, "viewMat");
+	GLint projectionLocation = glGetUniformLocation(shaderProgram->shader, "projectionMat");
 	//set the uniforms in the shader
 
 
@@ -256,22 +273,13 @@ void render(GLuint VAO, GLuint EBO,MainWorld* world,PersistantData* persData, ve
 	glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 
 	glBindTexture(GL_TEXTURE_2D, persData->backgroundTexture);//binds texture
-	GLint modelLocation = glGetUniformLocation(shaderProgram, "modelMat");
+	GLint modelLocation = glGetUniformLocation(shaderProgram->shader, "modelMat");
 	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(world->background.modelMatrix*world->background.rotationMatrix));
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 
 
-	//draw player
-	if (world->player.dead == false)
-	{
-		glBindTexture(GL_TEXTURE_2D, persData->playerTexture);//binds texture
-		GLint modelLocation = glGetUniformLocation(shaderProgram, "modelMat");
-		glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(world->player.modelMatrix*world->player.rotationMatrix));
-		glDrawElements(GL_TRIANGLES, numb, GL_UNSIGNED_INT, 0);
-	}
-
-
+	
 
 
 
@@ -287,7 +295,7 @@ void render(GLuint VAO, GLuint EBO,MainWorld* world,PersistantData* persData, ve
 		if (enermy.render == true)
 		{
 			glBindTexture(GL_TEXTURE_2D, persData->enermieTexture);//binds texture
-			GLint modelLocation2 = glGetUniformLocation(shaderProgram, "modelMat");
+			GLint modelLocation2 = glGetUniformLocation(shaderProgram->shader, "modelMat");
 
 			glUniformMatrix4fv(modelLocation2, 1, GL_FALSE, glm::value_ptr(enermy.modelMatrix*enermy.rotationMatrix));
 			glDrawElements(GL_TRIANGLES, numb, GL_UNSIGNED_INT, 0);
@@ -303,7 +311,7 @@ void render(GLuint VAO, GLuint EBO,MainWorld* world,PersistantData* persData, ve
 		{
 
 			glBindTexture(GL_TEXTURE_2D, persData->bulletTexture);//binds texture
-			GLint modelLocation2 = glGetUniformLocation(shaderProgram, "modelMat");
+			GLint modelLocation2 = glGetUniformLocation(shaderProgram->shader, "modelMat");
 
 			glUniformMatrix4fv(modelLocation2, 1, GL_FALSE, glm::value_ptr(bullet.modelMatrix*bullet.rotationMatrix));
 			glDrawElements(GL_TRIANGLES, numb, GL_UNSIGNED_INT, 0);
@@ -316,7 +324,7 @@ void render(GLuint VAO, GLuint EBO,MainWorld* world,PersistantData* persData, ve
 		{
 
 			glBindTexture(GL_TEXTURE_2D, persData->bulletTexture);//binds texture
-			GLint modelLocation2 = glGetUniformLocation(shaderProgram, "modelMat");
+			GLint modelLocation2 = glGetUniformLocation(shaderProgram->shader, "modelMat");
 
 			glUniformMatrix4fv(modelLocation2, 1, GL_FALSE, glm::value_ptr(bullet.modelMatrix*bullet.rotationMatrix));
 			glDrawElements(GL_TRIANGLES, numb, GL_UNSIGNED_INT, 0);
@@ -338,7 +346,7 @@ void render(GLuint VAO, GLuint EBO,MainWorld* world,PersistantData* persData, ve
 			else
 			glBindTexture(GL_TEXTURE_2D, persData->barrierTexture3);//binds texture
 
-			GLint modelLocation2 = glGetUniformLocation(shaderProgram, "modelMat");
+			GLint modelLocation2 = glGetUniformLocation(shaderProgram->shader, "modelMat");
 
 			glUniformMatrix4fv(modelLocation2, 1, GL_FALSE, glm::value_ptr(blockade.modelMatrix*blockade.rotationMatrix));
 
@@ -353,7 +361,7 @@ void render(GLuint VAO, GLuint EBO,MainWorld* world,PersistantData* persData, ve
 	}
 
 	glBindTexture(GL_TEXTURE_2D, persData->boundryTexture);//binds texture
-	GLint boundryModelLocation = glGetUniformLocation(shaderProgram, "modelMat");
+	GLint boundryModelLocation = glGetUniformLocation(shaderProgram->shader, "modelMat");
 
 	glUniformMatrix4fv(boundryModelLocation, 1, GL_FALSE, glm::value_ptr(world->sideWall.modelMatrix*world->sideWall.rotationMatrix));
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -389,7 +397,7 @@ void render(GLuint VAO, GLuint EBO,MainWorld* world,PersistantData* persData, ve
 
 
 	glBindTexture(GL_TEXTURE_2D, fontTexture);//binds texture
-	GLint modelLocationFont = glGetUniformLocation(shaderProgram, "modelMat");
+	GLint modelLocationFont = glGetUniformLocation(shaderProgram->shader, "modelMat");
 	glUniformMatrix4fv(modelLocationFont, 1, GL_FALSE, glm::value_ptr(world->LivesText.modelMatrix*world->LivesText.rotationMatrix));
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
@@ -409,7 +417,7 @@ void render(GLuint VAO, GLuint EBO,MainWorld* world,PersistantData* persData, ve
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texSurf->w, texSurf->h, 0, GL_BGRA, GL_UNSIGNED_BYTE, texSurf->pixels);
 	glBindTexture(GL_TEXTURE_2D, fontTexture);//binds texture
-	GLint modelLocationScore = glGetUniformLocation(shaderProgram, "modelMat");
+	GLint modelLocationScore = glGetUniformLocation(shaderProgram->shader, "modelMat");
 	glUniformMatrix4fv(modelLocationFont, 1, GL_FALSE, glm::value_ptr(world->scoreText.modelMatrix*world->scoreText.rotationMatrix));
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
@@ -422,6 +430,9 @@ void render(GLuint VAO, GLuint EBO,MainWorld* world,PersistantData* persData, ve
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+
+	glUniformMatrix4fv(glGetUniformLocation(shaderProgram->shader, "model"), 1, GL_FALSE, glm::value_ptr(world->test.modelMatrix*world->test.rotationMatrix));
+	world->test.Draw(shaderProgram);
 
 
 	// post-render
@@ -960,100 +971,100 @@ int main(int argc, char *argv[]) {
   //try finding reading from a seperate file
 
   //uniform vec3 colorUni;
-  const GLchar* vertexShaderSource = R"(
-		#version 430 core
-  		layout (location = 0) in vec3 position;
-		layout (location = 1) in vec3 color;
-		layout (location = 2) in vec2 texCoord;
+ // const GLchar* vertexShaderSource = R"(
+	//	#version 430 core
+ // 		layout (location = 0) in vec3 position;
+	//	layout (location = 1) in vec3 color;
+	//	layout (location = 2) in vec2 texCoord;
 
-		out vec3 ourColor;
-		out vec2 TexCoord;
-		
-		uniform mat4 modelMat;
-		uniform mat4 viewMat;
-		uniform mat4 projectionMat;
+	//	out vec3 ourColor;
+	//	out vec2 TexCoord;
+	//	
+	//	uniform mat4 modelMat;
+	//	uniform mat4 viewMat;
+	//	uniform mat4 projectionMat;
 
-		
+	//	
 
-		void main()
-		{
-			gl_Position = projectionMat * viewMat * modelMat * vec4(position.x, position.y, position.z, 1.0);
-			ourColor = color;
-			TexCoord = vec2(texCoord.x, 1.0f - texCoord.y);
-		}
-  )";
+	//	void main()
+	//	{
+	//		gl_Position = projectionMat * viewMat * modelMat * vec4(position.x, position.y, position.z, 1.0);
+	//		ourColor = color;
+	//		TexCoord = vec2(texCoord.x, 1.0f - texCoord.y);
+	//	}
+ // )";
 
-  const GLchar* fragmentShaderSource = R"(
-	#version 430 core
-	in vec3 ourColor;
-	in vec2 TexCoord;
+ // const GLchar* fragmentShaderSource = R"(
+	//#version 430 core
+	//in vec3 ourColor;
+	//in vec2 TexCoord;
 
-	out vec4 color;
-	
-
-
-    uniform sampler2D ourTexture;	
-
-	void main()
-	{
-	  color = texture(ourTexture, TexCoord) * vec4(ourColor, 1.0f) ;
-	}
-
-	)";
-
-  // Vertex shader
-  GLuint vertexShader;
-  vertexShader = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-  glCompileShader(vertexShader);
-
-  //check for errors
-  GLint success;//variable to store success state
-  GLchar infoLog[512];//stores error msg
-  glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);//gets succes status
-  if (!success)
-  {
-	  glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-	  std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILD\n" << infoLog << std::endl;
+	//out vec4 color;
+	//
 
 
-  }
+ //   uniform sampler2D ourTexture;	
 
-  // Fragment shader
-  GLuint fragmentShader;
-  fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-  glCompileShader(fragmentShader);
+	//void main()
+	//{
+	//  color = texture(ourTexture, TexCoord) * vec4(ourColor, 1.0f) ;
+	//}
 
-  // check for errors
-  glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);//gets succes status
-  if (!success)
-  {
-	  glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-	  std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILD\n" << infoLog << std::endl;
+	//)";
 
+ // // Vertex shader
+ // GLuint vertexShader;
+ // vertexShader = glCreateShader(GL_VERTEX_SHADER);
+ // glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+ // glCompileShader(vertexShader);
 
-  }
-
-  // Link Shaders
-  GLuint shaderProgram;
-  shaderProgram = glCreateProgram();//creating program and returns id of it
-									//attaching and linking shaders
-  glAttachShader(shaderProgram, vertexShader);
-  glAttachShader(shaderProgram, fragmentShader);
-  glLinkProgram(shaderProgram);
-
-  //check if it failed/succeded
-  glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-  if (!success)//if fails
-  {
-	  // glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-  }
+ // //check for errors
+ // GLint success;//variable to store success state
+ // GLchar infoLog[512];//stores error msg
+ // glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);//gets succes status
+ // if (!success)
+ // {
+	//  glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+	//  std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILD\n" << infoLog << std::endl;
 
 
-  glDeleteShader(vertexShader);//deltes the shader object now that we dont need it
-  glDeleteShader(fragmentShader);
-  //  glDeleteShader(fragmentShader2);
+ // }
+
+ // // Fragment shader
+ // GLuint fragmentShader;
+ // fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+ // glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+ // glCompileShader(fragmentShader);
+
+ // // check for errors
+ // glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);//gets succes status
+ // if (!success)
+ // {
+	//  glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
+	//  std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILD\n" << infoLog << std::endl;
+
+
+ // }
+
+ // // Link Shaders
+ // GLuint shaderProgram;
+ // shaderProgram = glCreateProgram();//creating program and returns id of it
+	//								//attaching and linking shaders
+ // glAttachShader(shaderProgram, vertexShader);
+ // glAttachShader(shaderProgram, fragmentShader);
+ // glLinkProgram(shaderProgram);
+
+ // //check if it failed/succeded
+ // glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+ // if (!success)//if fails
+ // {
+	//  // glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+ // }
+
+
+ // glDeleteShader(vertexShader);//deltes the shader object now that we dont need it
+ // glDeleteShader(fragmentShader);
+ // //  glDeleteShader(fragmentShader2);
 
   GLuint VAO, VBO, EBO;
   glGenVertexArrays(1, &VAO);
@@ -1096,6 +1107,7 @@ int main(int argc, char *argv[]) {
   
   persData->loadfont("assets\\cour.ttf");
 
+  ShaderProg* shader = new ShaderProg();
 
   MainWorld* world = new MainWorld();
 
@@ -1103,8 +1115,10 @@ int main(int argc, char *argv[]) {
  world->player = Sprite();
  world->player.sizeH = 0.2f;
  world->player.modelMatrix = glm::translate(world->player.modelMatrix, glm::vec3(0.0f, -1.3f, 0.0f));
- world->player.modelMatrix = glm::scale(world->player.modelMatrix, glm::vec3(world->player.sizeH));
+ world->player.modelMatrix = glm::scale(world->player.modelMatrix, glm::vec3(0.1f));
  world->player.health = 3;
+ world->player.loadModel("assets\\MeguMess.obj");
+
 // world->player.cooldownValue = 500;
 
 //background
@@ -1168,9 +1182,12 @@ int main(int argc, char *argv[]) {
   viewMatrix = glm::translate(viewMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
 
 
+ 
 
-
-
+  world->test.loadModel("assets\\cube.obj");
+  world->test.modelMatrix = glm::translate(world->test.modelMatrix, glm::vec3(0.0f, -1.75f, 0.0f)); // Translate it down a bit so it's at the center of the scene
+  world->test.modelMatrix = glm::scale(world->test.modelMatrix, glm::vec3(0.2f, 0.2f, 0.2f));	// It's a bit too big for our scene, so scale it down
+ 
 
   SDL_Log("Game Loop Started");
 
@@ -1198,7 +1215,7 @@ int main(int argc, char *argv[]) {
 		  //rendering
 		
 
-		  render(VAO,EBO,world,persData,colourValueGLMVector,shaderProgram,viewMatrix,projectionMatrix);
+		  render(VAO,EBO,world,persData,colourValueGLMVector, shader,viewMatrix,projectionMatrix);
 
 		  next_Game_Tick += skipTicks;
 	  }

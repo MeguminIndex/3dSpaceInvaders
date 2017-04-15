@@ -47,6 +47,8 @@ public:
 	Sprite player;
 	
 
+	Sprite test;
+
 	Sprite LivesText;
 	Sprite scoreText;
 

@@ -5,6 +5,12 @@
 #include "Sprite.h"
 #include "SDL_image.h"
 
+#include "Mesh.h"
+
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
 #include <GL/glew.h>
 
 #include <glm/glm.hpp>
@@ -27,6 +33,7 @@ class Sprite
 
 public:
 	Sprite();
+	Sprite(float x, float y, float z);
 	~Sprite();
 	
 	bool checkcollision(const float otherX, const float otherY,  float otherWidth,  float otherHeight);
@@ -54,5 +61,23 @@ public:
 	chrono::high_resolution_clock::time_point deathTime;
 
 	movementInput direction = movementInput::None;
+
+
+
+	/* new 3d stuff*/
+
+	vector<Mesh> meshes;
+	string directory;
+	vector<Texture> textures_loaded;
+
+	void Draw(ShaderProg* shader);
+
+	void loadModel(string path);
+	void processNode(aiNode* node, const aiScene* scene);
+	Mesh processMesh(aiMesh* mesh, const aiScene* scene);
+	vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, string typeName);
+	GLint LoadTexture(const char* path, string directory);
+
+
 };
 #endif // !#include "Sprite.h"

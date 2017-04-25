@@ -5,6 +5,7 @@
 #include "SDL_image.h"
 #include "SDL_mixer.h"
 #include "PersistantData.h"
+#include "ShaderProg.h"
 //#include "Sprite.h"
 #include <vector>
 
@@ -51,7 +52,8 @@ public:
 	
 	bool fullscreen = false;
 
-
+	ShaderProg* shader;
+	ShaderProg* shaderPlayer;
 
 	bool windowResized = false;
 	
@@ -66,7 +68,9 @@ public:
 	//Mix_Music* backingMusic;
 	//Mix_Chunk* pointPickUp;
 
+	//shaders
 
+	
 
 	//textures
 	GLuint enermieTexture;

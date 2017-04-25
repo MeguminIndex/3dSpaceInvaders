@@ -105,7 +105,7 @@ using namespace std;
 			return;
 		}
 		// Retrieve the directory path of the filepath
-		directory = path.substr(0, path.find_last_of('/'));
+		directory = path.substr(0, path.find_last_of('\\'));
 
 		// go through  ASSIMP's root node recursively
 		processNode(scene->mRootNode, scene);
@@ -151,6 +151,7 @@ using namespace std;
 			tmpVector.z = mesh->mVertices[i].z;
 			thisVertex.Position = tmpVector;//setting the position in my vertext struct
 			// grabbing infomation of mesh normals
+			
 			tmpVector.x = mesh->mNormals[i].x;
 			tmpVector.y = mesh->mNormals[i].y;
 			tmpVector.z = mesh->mNormals[i].z;
@@ -235,6 +236,9 @@ using namespace std;
 				textures_loaded.push_back(texture);  // Add to loaded textures
 			}
 		}
+		
+		cout << directory << endl;
+
 		return textures;
 	}
 
@@ -242,14 +246,14 @@ using namespace std;
 	{
 
 		string filename = string(path);
-		filename = "assets//" + filename;
-
-
+		//filename = "assets//" + filename;
+		filename = directory + '/' + filename;
+		cout << "File Name " + filename << endl;
 		SDL_Surface* image = IMG_Load(filename.c_str());
 		if (!image)
 		{
 			SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "IMG_Load error: %s\n", IMG_GetError());
-
+			
 		}
 
 		GLuint texture;

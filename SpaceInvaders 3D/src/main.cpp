@@ -145,18 +145,13 @@ void input(MainWorld* &world,PersistantData* &persData,vec3 &colourValueGLMVecto
 					}
 					break;
 
-				case SDL_SCANCODE_W:
-				//	world->player.direction = movementInput::Up;
-					break;
+			
 
 				case SDL_SCANCODE_A:
 					world->player.direction = movementInput::Left;
 					break;
 
-				case SDL_SCANCODE_S:
-					//world->player.direction = movementInput::Down;
-					break;
-
+			
 				case SDL_SCANCODE_D:
 					world->player.direction = movementInput::Right;
 					break;
@@ -168,28 +163,29 @@ void input(MainWorld* &world,PersistantData* &persData,vec3 &colourValueGLMVecto
 
 
 
-				//case SDLK_UP:
-				//	world->camPosition += world->camUp*world->camSpeed;
-				//	break;
-				//case SDLK_DOWN:
-				//	world->camPosition -= world->camUp*world->camSpeed;
-				//	break;
-				//case SDLK_RIGHT:
-				//	world->camAngle = glm::radians(0.5f);
-				//	world->cameraRotationMatrix = glm::rotate(world->cameraRotationMatrix, world->camAngle, glm::vec3(0.0f, 1.0f, 0.0f));
-				//	break;
-				//case SDLK_LEFT:
-				//	world->camAngle = glm::radians(-0.5f);
-				//	world->cameraRotationMatrix = glm::rotate(world->cameraRotationMatrix, world->camAngle, glm::vec3(0.0f, 1.0f, 0.0f));
-				//	break;
-				//case SDLK_w:
-				//	world->camPosition += world->camLook * world->camSpeed;
-				//	break;
-				//case SDLK_s:
-				//	world->camPosition -= world->camLook * world->camSpeed;
-				//	break;
-				//default:
-				//	break;
+				case SDL_SCANCODE_UP:
+					world->camPosition += world->camUp*world->camSpeed;
+					break;
+				case SDL_SCANCODE_DOWN:
+					world->camPosition -= world->camUp*world->camSpeed;
+					break;
+				case SDL_SCANCODE_RIGHT:
+					world->camAngle = glm::radians(0.5f);
+					world->cameraRotationMatrix = glm::rotate(world->cameraRotationMatrix, world->camAngle, glm::vec3(0.0f, 1.0f, 0.0f));
+					break;
+				case SDL_SCANCODE_LEFT:
+					
+					world->camAngle = glm::radians(-0.5f);
+					world->cameraRotationMatrix = glm::rotate(world->cameraRotationMatrix, world->camAngle, glm::vec3(0.0f, 1.0f, 0.0f));
+					break;
+				case SDL_SCANCODE_W:
+					world->camPosition += world->camLook * world->camSpeed;
+					break;
+				case SDL_SCANCODE_S:
+					world->camPosition -= world->camLook * world->camSpeed;
+					break;
+				default:
+					break;
 
 
 				}
@@ -227,7 +223,7 @@ void input(MainWorld* &world,PersistantData* &persData,vec3 &colourValueGLMVecto
 
 	}
 }
-void render(GLuint VAO, GLuint EBO,MainWorld* world,PersistantData* persData, vec3 &colourValueGLMVector, ShaderProg* shaderProgram, mat4 viewMatrix, mat4 projectionMatrix)
+void render(GLuint VAO, GLuint EBO,MainWorld* world,PersistantData* persData, vec3 &colourValueGLMVector, ShaderProg* shaderProgram)
 {
 
 	
@@ -241,19 +237,7 @@ void render(GLuint VAO, GLuint EBO,MainWorld* world,PersistantData* persData, ve
 	
 	glClearColor(colourValueGLMVector.r, colourValueGLMVector.g, colourValueGLMVector.b, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	//draw player
-	if (world->player.dead == false)
-	{
-	//	glBindTexture(GL_TEXTURE_2D, persData->playerTexture);//binds texture
-		GLint modelLocation = glGetUniformLocation(shaderProgram->shader, "modelMat");
-		glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(world->player.modelMatrix*world->player.rotationMatrix));
-
-		world->player.Draw(shaderProgram);
-		//glDrawElements(GL_TRIANGLES, numb, GL_UNSIGNED_INT, 0);
-	}
-
-
+	world->viewMatrix = glm::lookAt(world->camPosition, world->camPosition + world->camLook, world->camUp);
 
 	// render
 	glUseProgram(shaderProgram->shader);
@@ -261,34 +245,18 @@ void render(GLuint VAO, GLuint EBO,MainWorld* world,PersistantData* persData, ve
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 
 
-	viewMatrix = glm::lookAt(world->camPosition, world->camPosition + world->camLook, world->camUp);
-
-
 	GLint viewLocation = glGetUniformLocation(shaderProgram->shader, "viewMat");
 	GLint projectionLocation = glGetUniformLocation(shaderProgram->shader, "projectionMat");
 	//set the uniforms in the shader
 
 
-	glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(viewMatrix*world->cameraRotationMatrix));
-	glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+	glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(world->viewMatrix*world->cameraRotationMatrix));
+	glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(world->projectionMatrix));
 
 	glBindTexture(GL_TEXTURE_2D, persData->backgroundTexture);//binds texture
 	GLint modelLocation = glGetUniformLocation(shaderProgram->shader, "modelMat");
 	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(world->background.modelMatrix*world->background.rotationMatrix));
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-
-
-	
-
-
-
-
-
-
-
-
-
 
 	for (const auto &enermy : world->enermieSp)
 	{
@@ -303,7 +271,6 @@ void render(GLuint VAO, GLuint EBO,MainWorld* world,PersistantData* persData, ve
 
 	}
 
-
 	for (const auto &bullet : world->bullets)
 	{
 
@@ -317,6 +284,7 @@ void render(GLuint VAO, GLuint EBO,MainWorld* world,PersistantData* persData, ve
 			glDrawElements(GL_TRIANGLES, numb, GL_UNSIGNED_INT, 0);
 		}
 	}
+
 	for (const auto &bullet : world->enermieBullets)
 	{
 
@@ -331,7 +299,6 @@ void render(GLuint VAO, GLuint EBO,MainWorld* world,PersistantData* persData, ve
 		}
 	}
 	
-
 	for (const auto &blockade : world->barriers)
 	{
 
@@ -366,10 +333,9 @@ void render(GLuint VAO, GLuint EBO,MainWorld* world,PersistantData* persData, ve
 	glUniformMatrix4fv(boundryModelLocation, 1, GL_FALSE, glm::value_ptr(world->sideWall.modelMatrix*world->sideWall.rotationMatrix));
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-
-
 #pragma region text Rendering
-
+	
+	
 	SDL_Color color;
 	color.r = 255;
 	color.b = 255;
@@ -397,7 +363,7 @@ void render(GLuint VAO, GLuint EBO,MainWorld* world,PersistantData* persData, ve
 
 
 	glBindTexture(GL_TEXTURE_2D, fontTexture);//binds texture
-	GLint modelLocationFont = glGetUniformLocation(shaderProgram->shader, "modelMat");
+	GLint modelLocationFont = glGetUniformLocation(persData->shaderPlayer->shader, "modelMat");
 	glUniformMatrix4fv(modelLocationFont, 1, GL_FALSE, glm::value_ptr(world->LivesText.modelMatrix*world->LivesText.rotationMatrix));
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
@@ -417,7 +383,7 @@ void render(GLuint VAO, GLuint EBO,MainWorld* world,PersistantData* persData, ve
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texSurf->w, texSurf->h, 0, GL_BGRA, GL_UNSIGNED_BYTE, texSurf->pixels);
 	glBindTexture(GL_TEXTURE_2D, fontTexture);//binds texture
-	GLint modelLocationScore = glGetUniformLocation(shaderProgram->shader, "modelMat");
+	GLint modelLocationScore = glGetUniformLocation(persData->shaderPlayer->shader, "modelMat");
 	glUniformMatrix4fv(modelLocationFont, 1, GL_FALSE, glm::value_ptr(world->scoreText.modelMatrix*world->scoreText.rotationMatrix));
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
@@ -428,12 +394,15 @@ void render(GLuint VAO, GLuint EBO,MainWorld* world,PersistantData* persData, ve
 #pragma endregion
 
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
 
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram->shader, "model"), 1, GL_FALSE, glm::value_ptr(world->test.modelMatrix*world->test.rotationMatrix));
-	world->test.Draw(shaderProgram);
+	//draw player
+	if (world->player.dead == false)
+	{
 
+		GLint modelLocation = glGetUniformLocation(persData->shaderPlayer->shader, "modelMat");
+		glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(world->player.modelMatrix*world->player.rotationMatrix));
+		world->player.Draw(persData->shaderPlayer);
+	}
 
 	// post-render
 	SDL_GL_SwapWindow(persData->window);
@@ -450,6 +419,14 @@ void update(MainWorld* &world, PersistantData* &persData, chrono::duration<doubl
 		glViewport(0, 0, w, h);
 		persData->windowResized = false;
 	}
+
+//	world->LivesText.modelMatrix = glm::translate(world->viewMatrix, glm::vec3(-1.5f, 0.0f, 5.0f));
+////	world->LivesText.modelMatrix = glm::scale(world->LivesText.modelMatrix, glm::vec3(0.4f));
+//
+//	world->scoreText.modelMatrix = glm::translate(world->viewMatrix, glm::vec3(-1.5f, 0.6f, 5.0f));
+//	//world->scoreText.modelMatrix = glm::scale(world->scoreText.modelMatrix, glm::vec3(0.4f));
+
+
 
 	if (persData->gameOver == false && persData->gameWon == false)
 	{
@@ -488,7 +465,7 @@ void update(MainWorld* &world, PersistantData* &persData, chrono::duration<doubl
 			}
 			world->playerFire = false;
 
-			cout << "player x pos: " << world->player.modelMatrix[3].x << endl;
+		//	cout << "player x pos: " << world->player.modelMatrix[3].x << endl;
 		}
 		
 
@@ -1107,7 +1084,89 @@ int main(int argc, char *argv[]) {
   
   persData->loadfont("assets\\cour.ttf");
 
-  ShaderProg* shader = new ShaderProg();
+#pragma region MainShaderSource
+  const GLchar* vertexShaderSource1 = R"(
+		#version 430 core
+  		layout (location = 0) in vec3 position;
+		layout (location = 1) in vec3 color;
+		layout (location = 2) in vec2 texCoord;
+
+		out vec3 ourColor;
+		out vec2 TexCoord;
+		
+		uniform mat4 modelMat;
+		uniform mat4 viewMat;
+		uniform mat4 projectionMat;
+
+		
+
+		void main()
+		{
+			gl_Position = projectionMat * viewMat * modelMat * vec4(position.x, position.y, position.z, 1.0);
+			ourColor = color;
+			TexCoord = vec2(texCoord.x, 1.0f - texCoord.y);
+		}
+  )";
+
+  const GLchar* fragmentShaderSource1 = R"(
+	#version 430 core
+	in vec3 ourColor;
+	in vec2 TexCoord;
+
+	out vec4 color;
+	
+
+
+    uniform sampler2D ourTexture;	
+
+	void main()
+	{
+	  color = texture(ourTexture, TexCoord) * vec4(ourColor, 1.0f) ;
+	}
+
+	)";
+#pragma endregion
+
+#pragma region PlayerShaderSource
+  const GLchar* playerVertexShaderSource = R"(
+		#version 430 core
+  		layout (location = 0) in vec3 position;
+		layout (location = 1) in vec3 normal;
+		layout (location = 2) in vec2 texCoords;
+
+		out vec2 TexCoords;
+
+		uniform mat4 modelMat;
+		uniform mat4 view;
+		uniform mat4 projection;
+
+		void main()
+		{
+		  gl_Position = projection * view * modelMat * vec4(position.x, position.y, position.z, 1.0f);
+		  TexCoords = texCoords;
+		}
+  )";
+
+  const GLchar* playerFragmentShaderSource = R"(
+	#version 430 core
+	in vec2 TexCoords;
+
+	out vec4 color;
+
+	uniform sampler2D texture_diffuse1;
+
+	void main()
+	{    
+		color = vec4(texture(texture_diffuse1, TexCoords));
+	}
+
+	)";
+#pragma endregion
+
+
+  persData->shader = new ShaderProg(vertexShaderSource1, fragmentShaderSource1);
+
+  persData->shaderPlayer = new ShaderProg(playerVertexShaderSource, playerFragmentShaderSource);
 
   MainWorld* world = new MainWorld();
 
@@ -1124,7 +1183,7 @@ int main(int argc, char *argv[]) {
 //background
  world->background = Sprite();
  world->background.modelMatrix = glm::translate(world->background.modelMatrix, glm::vec3(15.0f, -6.0f, -3.0f));
- world->background.modelMatrix = glm::scale(world->background.modelMatrix, glm::vec3(30.0f,24.0f,1.0f));
+ world->background.modelMatrix = glm::scale(world->background.modelMatrix, glm::vec3(38.0f,24.0f,1.0f));
  
  // world->background.rotationMatrix = glm::rotate(world->background.rotationMatrix, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
  //barriers
@@ -1167,9 +1226,7 @@ int main(int argc, char *argv[]) {
 
   world->scoreText.modelMatrix = glm::translate(world->scoreText.modelMatrix, glm::vec3(-1.5f, 0.6f, 0.0f));
   world->scoreText.modelMatrix = glm::scale(world->scoreText.modelMatrix, glm::vec3(0.4f));
-  glm::mat4 viewMatrix;
-
-  glm::mat4 projectionMatrix;
+ 
 
   
   SDL_GetWindowSize(persData->window, &width, &height);
@@ -1177,9 +1234,9 @@ int main(int argc, char *argv[]) {
 	//left, right, bottom, top, near clip plane, far clip plane
  // projectionMatrix = glm::ortho(0.0f, 4.0f, 0.0f, 3.0f, -1.0f, 100.0f);
 
-  projectionMatrix = glm::perspective(glm::radians(100.0f), (GLfloat)width / (GLfloat)height, 0.1f, 100.0f);
+  world->projectionMatrix = glm::perspective(glm::radians(100.0f), (GLfloat)width / (GLfloat)height, 0.1f, 100.0f);
 
-  viewMatrix = glm::translate(viewMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
+  world->viewMatrix = glm::translate(world->viewMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
 
 
  
@@ -1215,7 +1272,7 @@ int main(int argc, char *argv[]) {
 		  //rendering
 		
 
-		  render(VAO,EBO,world,persData,colourValueGLMVector, shader,viewMatrix,projectionMatrix);
+		  render(VAO,EBO,world,persData,colourValueGLMVector, persData->shader);
 
 		  next_Game_Tick += skipTicks;
 	  }

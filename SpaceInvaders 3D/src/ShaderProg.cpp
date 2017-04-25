@@ -1,9 +1,10 @@
 #include "ShaderProg.h"
 
 
-ShaderProg::ShaderProg()
+ShaderProg::ShaderProg(const GLchar* vertext, const GLchar* fragment)
 {
-	
+	vertexShaderSource = vertext;
+	fragmentShaderSource = fragment;
 
 	// Vertex shader
 	GLuint vertexShader;

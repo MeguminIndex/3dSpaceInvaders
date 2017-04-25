@@ -152,10 +152,10 @@ using namespace std;
 			thisVertex.Position = tmpVector;//setting the position in my vertext struct
 			// grabbing infomation of mesh normals
 			
-			tmpVector.x = mesh->mNormals[i].x;
-			tmpVector.y = mesh->mNormals[i].y;
-			tmpVector.z = mesh->mNormals[i].z;
-			thisVertex.Normal = tmpVector;//updating my vertex struct 
+			//tmpVector.x = mesh->mNormals[i].x;
+			//tmpVector.y = mesh->mNormals[i].y;
+			//tmpVector.z = mesh->mNormals[i].z;
+			//thisVertex.Normal = tmpVector;//updating my vertex struct 
 
 			//checking if mesh has texture cords
 			if (mesh->mTextureCoords[0])
@@ -201,6 +201,10 @@ using namespace std;
 			textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 			vector<Texture> specularMaps = loadMaterialTextures(material,aiTextureType_SPECULAR, "texture_specular");
 			textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+			//nano suits texture is not one of these so try loading in something different with different type paramater
+		//try ambient  aiTextureType_AMBIENT 
+			vector<Texture> ambientMaps = loadMaterialTextures(material, aiTextureType_UNKNOWN, "texture_ambient");
+			textures.insert(textures.end(), ambientMaps.begin(), ambientMaps.end());
 
 		}
 
@@ -212,6 +216,8 @@ using namespace std;
 	vector<Texture> Sprite::loadMaterialTextures(aiMaterial* mat, aiTextureType type, string typeName)
 	{
 		vector<Texture> textures;
+		GLint num = mat->GetTextureCount(type);
+		cout <<"Numbe of " << type <<" "<< num<< endl;
 		for (GLuint i = 0; i < mat->GetTextureCount(type); i++)
 		{
 			aiString str;

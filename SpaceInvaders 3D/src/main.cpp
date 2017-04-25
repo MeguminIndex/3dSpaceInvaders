@@ -389,11 +389,17 @@ void render(GLuint VAO, GLuint EBO,MainWorld* world,PersistantData* persData, ve
 
 
 	SDL_FreeSurface(texSurf);
-
+	glDeleteTextures(1, &fontTexture);
 
 #pragma endregion
+	glUseProgram(persData->shaderPlayer->shader);
+	viewLocation = glGetUniformLocation(persData->shaderPlayer->shader, "view");
+	projectionLocation = glGetUniformLocation(persData->shaderPlayer->shader, "projection");
+	//set the uniforms in the shader
 
 
+	glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(world->viewMatrix*world->cameraRotationMatrix));
+	glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(world->projectionMatrix));
 
 	//draw player
 	if (world->player.dead == false)
@@ -1157,7 +1163,7 @@ int main(int argc, char *argv[]) {
 
 	void main()
 	{    
-		color = vec4(texture(texture_diffuse1, TexCoords));
+		color = vec4(texture(texture_diffuse1, TexCoords)) * vec4(1,1,1,1);
 	}
 
 	)";
@@ -1176,8 +1182,8 @@ int main(int argc, char *argv[]) {
  world->player.modelMatrix = glm::translate(world->player.modelMatrix, glm::vec3(0.0f, -1.3f, 0.0f));
  world->player.modelMatrix = glm::scale(world->player.modelMatrix, glm::vec3(0.1f));
  world->player.health = 3;
- world->player.loadModel("assets\\MeguMess.obj");
-
+// world->player.loadModel("assets/blockycharacters/Models/advancedCharacter.fbx");
+ world->player.loadModel("assets/Nanosuit2/nanosuit2.obj");
 // world->player.cooldownValue = 500;
 
 //background
